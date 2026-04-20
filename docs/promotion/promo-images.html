@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公文渲染引擎 V14 - 宣传图片</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: #0f1419;
+            color: #fff;
+            padding: 40px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 60px;
+            font-size: 36px;
+            font-weight: 700;
+            color: #e8e8e8;
+        }
+        .promo-card {
+            background: #1a1f2e;
+            border-radius: 16px;
+            margin-bottom: 60px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        .card-label {
+            background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .promo-content {
+            padding: 0;
+        }
+
+        /* 图片1: Banner */
+        .banner-wrapper {
+            height: 400px;
+            background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .banner-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+        }
+        .banner-content {
+            position: relative;
+            z-index: 10;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 80px;
+        }
+        .banner-left {
+            max-width: 600px;
+        }
+        .banner-title {
+            font-size: 56px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #c41e3a 0%, #ff4444 50%, #c41e3a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        .banner-subtitle {
+            font-size: 18px;
+            color: #8899aa;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .banner-badges {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .badge {
+            background: rgba(196, 30, 58, 0.15);
+            border: 1px solid rgba(196, 30, 58, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #ff6b6b;
+        }
+        .banner-right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .code-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            box-shadow: 0 20px 40px rgba(196, 30, 58, 0.3);
+        }
+        .version-tag {
+            background: #c41e3a;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .banner-decoration {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(196, 30, 58, 0.2) 0%, transparent 70%);
+        }
+        .deco-1 { top: -100px; right: 100px; }
+        .deco-2 { bottom: -100px; left: 200px; }
+        .deco-3 { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 500px; height: 500px; }
+
+        /* 图片2: 对比图 */
+        .compare-wrapper {
+            padding: 50px;
+            background: linear-gradient(180deg, #1a1f2e 0%, #12171e 100%);
+        }
+        .compare-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .compare-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .compare-subtitle {
+            color: #8899aa;
+            font-size: 16px;
+        }
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 30px;
+            align-items: center;
+        }
+        .compare-box {
+            background: #0f1419;
+            border-radius: 12px;
+            padding: 30px;
+            border: 2px solid;
+        }
+        .compare-box.before {
+            border-color: #ff4444;
+        }
+        .compare-box.after {
+            border-color: #00cc66;
+        }
+        .compare-label {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .label-before {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+        }
+        .label-after {
+            background: rgba(0, 204, 102, 0.2);
+            color: #00cc66;
+        }
+        .doc-preview {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 200px;
+        }
+        .doc-header-line {
+            height: 4px;
+            background: #c41e3a;
+            margin-bottom: 15px;
+        }
+        .doc-header-line.broken {
+            height: 20px;
+            background: linear-gradient(90deg, #c41e3a 0%, #c41e3a 40%, transparent 40%);
+            margin-bottom: 5px;
+        }
+        .doc-title-text {
+            font-size: 24px;
+            font-weight: 900;
+            color: #c41e3a;
+            text-align: center;
+            margin: 15px 0;
+            letter-spacing: 8px;
+        }
+        .doc-title-text.broken {
+            font-size: 16px;
+            letter-spacing: 2px;
+            color: #666;
+        }
+        .doc-subtitle {
+            font-size: 12px;
+            color: #333;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .doc-line {
+            height: 1px;
+            background: #ddd;
+            margin: 8px 0;
+        }
+        .arrow-icon {
+            font-size: 48px;
+            color: #c41e3a;
+            text-align: center;
+        }
+        .feature-fix {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .fix-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .fix-icon.error {
+            background: #ff4444;
+            color: #fff;
+        }
+        .fix-icon.success {
+            background: #00cc66;
+            color: #fff;
+        }
+
+        /* 图片3: 架构流程图 */
+        .flow-wrapper {
+            padding: 60px 50px;
+            background: linear-gradient(135deg, #12171e 0%, #1a1f2e 100%);
+        }
+        .flow-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .flow-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        .flow-node {
+            background: #0f1419;
+            border-radius: 16px;
+            padding: 30px;
+            min-width: 200px;
+            text-align: center;
+            border: 2px solid #2a3441;
+            position: relative;
+        }
+        .flow-node.input {
+            border-color: #3b82f6;
+        }
+        .flow-node.engine {
+            border-color: #c41e3a;
+            background: linear-gradient(135deg, #1a0a10 0%, #1a1f2e 100%);
+            min-width: 280px;
+        }
+        .flow-node.output {
+            border-color: #10b981;
+        }
+        .node-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        .node-icon.input-icon {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+        .node-icon.engine-icon {
+            background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+        }
+        .node-icon.output-icon {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .node-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .node-desc {
+            font-size: 13px;
+            color: #8899aa;
+            line-height: 1.5;
+        }
+        .flow-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .arrow-line {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6 0%, #c41e3a 100%);
+        }
+        .arrow-line.out {
+            background: linear-gradient(90deg, #c41e3a 0%, #10b981 100%);
+        }
+        .arrow-head {
+            font-size: 20px;
+            color: #c41e3a;
+        }
+        .engine-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .engine-feature {
+            background: rgba(196, 30, 58, 0.1);
+            border: 1px solid rgba(196, 30, 58, 0.2);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #ff6b6b;
+        }
+
+        /* 图片4: 示例效果图 */
+        .sample-wrapper {
+            padding: 50px;
+            background: #0f1419;
+        }
+        .sample-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .sample-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .sample-subtitle {
+            color: #8899aa;
+            font-size: 16px;
+        }
+        .sample-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+        .sample-card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .doc-sample {
+            padding: 30px;
+        }
+        .sample-red-header {
+            height: 50px;
+            background: #c41e3a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .sample-header-text {
+            color: #fff;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 12px;
+        }
+        .sample-body {
+            padding: 20px;
+        }
+        .sample-doc-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: #c41e3a;
+            text-align: center;
+            margin: 20px 0;
+            letter-spacing: 8px;
+        }
+        .sample-subtitle-text {
+            font-size: 14px;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .sample-divider {
+            height: 2px;
+            background: #c41e3a;
+            margin: 15px 0;
+        }
+        .sample-content-line {
+            font-size: 14px;
+            color: #333;
+            line-height: 2;
+            text-indent: 2em;
+        }
+        .sample-stamp {
+            width: 80px;
+            height: 80px;
+            border: 3px solid #c41e3a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            color: #c41e3a;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            transform: rotate(-15deg);
+        }
+        .sample-footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+        }
+        .sample-label {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #c41e3a;
+            color: #fff;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1200px) {
+            .sample-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 900px) {
+            .banner-title {
+                font-size: 42px;
+            }
+            .compare-grid {
+                grid-template-columns: 1fr;
+            }
+            .arrow-icon {
+                transform: rotate(90deg);
+            }
+            .flow-diagram {
+                flex-direction: column;
+            }
+            .arrow-line {
+                width: 3px;
+                height: 40px;
+                background: linear-gradient(180deg, #3b82f6 0%, #c41e3a 100%);
+            }
+            .arrow-line.out {
+                background: linear-gradient(180deg, #c41e3a 0%, #10b981 100%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>公文渲染引擎 V14 - 宣传图片素材</h1>
+
+        <!-- 图片1: 项目Banner -->
+        <div class="promo-card">
+            <div class="card-label">图片 1: 项目 Banner</div>
+            <div class="promo-content">
+                <div class="banner-wrapper">
+                    <div class="banner-decoration deco-1"></div>
+                    <div class="banner-decoration deco-2"></div>
+                    <div class="banner-decoration deco-3"></div>
+                    <div class="banner-content">
+                        <div class="banner-left">
+                            <div class="banner-title">公文渲染引擎</div>
+                            <div class="banner-subtitle">
+                                符合 GB/T 9704-2012 国家标准<br>
+                                专业 Word 公文生成解决方案
+                            </div>
+                            <div class="banner-badges">
+                                <span class="badge">红头修复</span>
+                                <span class="badge">层级解析</span>
+                                <span class="badge">印章集成</span>
+                                <span class="badge">Docker部署</span>
+                            </div>
+                        </div>
+                        <div class="banner-right">
+                            <div class="code-icon">{ }</div>
+                            <div class="version-tag">V14</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 图片2: 对比图 -->
+        <div class="promo-card">
+            <div class="card-label">图片 2: 红头效果对比</div>
+            <div class="promo-content">
+                <div class="compare-wrapper">
+                    <div class="compare-header">
+                        <div class="compare-title">红头大字修复对比</div>
+                        <div class="compare-subtitle">彻底解决剃头问题，完美呈现公文红头</div>
+                    </div>
+                    <div class="compare-grid">
+                        <div class="compare-box before">
+                            <span class="compare-label label-before">修复前</span>
+                            <div class="doc-preview">
+                                <div class="doc-header-line broken"></div>
+                                <div class="doc-header-line broken"></div>
+                                <div class="doc-title-text broken">XXX文件</div>
+                                <div class="doc-subtitle">[标题显示不完整]</div>
+                                <div class="doc-line"></div>
+                                <div class="doc-line"></div>
+                            </div>
+                            <div class="feature-fix">
+                                <span class="fix-icon error">X</span>
+                                <span>红头被截断，标题显示异常</span>
+                            </div>
+                        </div>
+                        <div class="arrow-icon">--></div>
+                        <div class="compare-box after">
+                            <span class="compare-label label-after">修复后</span>
+                            <div class="doc-preview">
+                                <div class="doc-header-line"></div>
+                                <div class="doc-title-text">XXX文件</div>
+                                <div class="doc-subtitle">完整显示 · 居中对齐</div>
+                                <div class="doc-line"></div>
+                                <div class="doc-line"></div>
+                                <div class="doc-line"></div>
+                            </div>
+                            <div class="feature-fix">
+                                <span class="fix-icon success">OK</span>
+                                <span>完美显示，符合国标要求</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 图片3: 架构流程图 -->
+        <div class="promo-card">
+            <div class="card-label">图片 3: 架构流程图</div>
+            <div class="promo-content">
+                <div class="flow-wrapper">
+                    <div class="flow-header">
+                        <div class="flow-title">核心处理流程</div>
+                        <div class="compare-subtitle">JSON配置输入，一键生成标准公文</div>
+                    </div>
+                    <div class="flow-diagram">
+                        <div class="flow-node input">
+                            <div class="node-icon input-icon">
+                                <span>{ }</span>
+                            </div>
+                            <div class="node-title">JSON 输入</div>
+                            <div class="node-desc">
+                                结构化公文数据<br>
+                                支持复杂层级配置
+                            </div>
+                        </div>
+                        <div class="flow-arrow">
+                            <div class="arrow-line"></div>
+                            <div class="arrow-head">--> </div>
+                        </div>
+                        <div class="flow-node engine">
+                            <div class="node-icon engine-icon">
+                                <span>ENGINE</span>
+                            </div>
+                            <div class="node-title">渲染引擎</div>
+                            <div class="node-desc">GB/T 9704-2012 标准</div>
+                            <div class="engine-features">
+                                <div class="engine-feature">红头处理</div>
+                                <div class="engine-feature">层级解析</div>
+                                <div class="engine-feature">印章集成</div>
+                                <div class="engine-feature">格式校验</div>
+                            </div>
+                        </div>
+                        <div class="flow-arrow">
+                            <div class="arrow-line out"></div>
+                            <div class="arrow-head">--> </div>
+                        </div>
+                        <div class="flow-node output">
+                            <div class="node-icon output-icon">
+                                <span>W</span>
+                            </div>
+                            <div class="node-title">Word 输出</div>
+                            <div class="node-desc">
+                                标准公文格式<br>
+                                直接打印可用
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 图片4: 示例效果图 -->
+        <div class="promo-card">
+            <div class="card-label">图片 4: 公文样式示例</div>
+            <div class="promo-content">
+                <div class="sample-wrapper">
+                    <div class="sample-header">
+                        <div class="sample-title">生成的公文效果</div>
+                        <div class="sample-subtitle">完全符合国家标准，支持多种公文类型</div>
+                    </div>
+                    <div class="sample-grid">
+                        <div class="sample-card">
+                            <div class="sample-red-header">
+                                <div class="sample-header-text">XX省人民政府文件</div>
+                            </div>
+                            <div class="sample-body">
+                                <div class="sample-doc-title">关于XX工作的通知</div>
+                                <div class="sample-subtitle-text">XX发〔2024〕15号</div>
+                                <div class="sample-divider"></div>
+                                <div class="sample-content-line">各市、县（区）人民政府，省政府各部门：</div>
+                                <div class="sample-content-line">根据XX工作要求，现将有关事项通知如下...</div>
+                                <div class="sample-stamp">
+                                    XX省<br>人民政府
+                                </div>
+                                <div class="sample-footer">
+                                    <span>2024年4月20日印发</span>
+                                    <span>共印100份</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sample-card">
+                            <div class="sample-red-header">
+                                <div class="sample-header-text">XX市人民政府办公室</div>
+                            </div>
+                            <div class="sample-body">
+                                <div class="sample-doc-title">关于召开XX会议的通知</div>
+                                <div class="sample-subtitle-text">XX办发〔2024〕08号</div>
+                                <div class="sample-divider"></div>
+                                <div class="sample-content-line">各县（市、区）人民政府，市直各单位：</div>
+                                <div class="sample-content-line">经市政府同意，定于2024年4月25日召开...</div>
+                                <div class="sample-stamp">
+                                    XX市<br>政府办
+                                </div>
+                                <div class="sample-footer">
+                                    <span>2024年4月18日印发</span>
+                                    <span>共印50份</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer style="text-align: center; padding: 40px; color: #666;">
+            <p style="margin-bottom: 10px;">
+                <strong>GitHub:</strong>
+                <a href="https://github.com/jaxky2012/gongwen-engine-open" style="color: #c41e3a;">
+                    https://github.com/jaxky2012/gongwen-engine-open
+                </a>
+            </p>
+            <p style="color: #555; font-size: 14px;">
+                公文渲染引擎 V14 - 符合 GB/T 9704-2012 国家标准
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公文渲染引擎 V14 - 图片预览</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: #0f1419;
+            color: #fff;
+            min-height: 100vh;
+        }
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            border-bottom: 1px solid #2a3441;
+            z-index: 1000;
+        }
+        .nav-title {
+            font-weight: 700;
+            color: #c41e3a;
+        }
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+        .nav-link {
+            color: #8899aa;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            background: rgba(196, 30, 58, 0.2);
+            color: #ff6b6b;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 100px 40px 40px;
+        }
+        .preview-section {
+            margin-bottom: 80px;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #e8e8e8;
+        }
+        .download-btn {
+            background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(196, 30, 58, 0.3);
+        }
+        .iframe-wrapper {
+            background: #1a1f2e;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            border: 1px solid #2a3441;
+        }
+        .iframe-container {
+            position: relative;
+        }
+        iframe {
+            width: 100%;
+            border: none;
+            display: block;
+        }
+        .tips {
+            background: rgba(196, 30, 58, 0.1);
+            border: 1px solid rgba(196, 30, 58, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .tips-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #ff6b6b;
+        }
+        .tips-list {
+            list-style: none;
+            font-size: 14px;
+            color: #8899aa;
+            line-height: 1.8;
+        }
+        .tips-list li::before {
+            content: ">";
+            color: #c41e3a;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-title">公文渲染引擎 V14 - 图片预览</div>
+        <div class="nav-links">
+            <a href="#banner" class="nav-link active">Banner</a>
+            <a href="#compare" class="nav-link">对比图</a>
+            <a href="#flow" class="nav-link">流程图</a>
+            <a href="#sample" class="nav-link">示例图</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Banner -->
+        <section class="preview-section" id="banner">
+            <div class="section-header">
+                <h2 class="section-title">1. 项目 Banner</h2>
+                <a href="promo-images.html" class="download-btn" target="_blank">
+                    查看完整HTML
+                </a>
+            </div>
+            <div class="iframe-wrapper">
+                <div class="iframe-container" style="height: 450px;">
+                    <iframe src="promo-images.html" style="height: 1400px; transform: scale(0.32); transform-origin: top left; width: 312%;"></iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- 对比图 -->
+        <section class="preview-section" id="compare">
+            <div class="section-header">
+                <h2 class="section-title">2. 红头效果对比图</h2>
+            </div>
+            <div class="iframe-wrapper">
+                <div class="iframe-container" style="height: 550px;">
+                    <iframe src="promo-images.html" style="height: 1800px; transform: scale(0.32); transform-origin: top left; width: 312%;"></iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- 流程图 -->
+        <section class="preview-section" id="flow">
+            <div class="section-header">
+                <h2 class="section-title">3. 架构流程图</h2>
+            </div>
+            <div class="iframe-wrapper">
+                <div class="iframe-container" style="height: 480px;">
+                    <iframe src="promo-images.html" style="height: 1900px; transform: scale(0.32); transform-origin: top left; width: 312%;"></iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- 示例图 -->
+        <section class="preview-section" id="sample">
+            <div class="section-header">
+                <h2 class="section-title">4. 公文样式示例</h2>
+            </div>
+            <div class="iframe-wrapper">
+                <div class="iframe-container" style="height: 750px;">
+                    <iframe src="promo-images.html" style="height: 2300px; transform: scale(0.32); transform-origin: top left; width: 312%;"></iframe>
+                </div>
+            </div>
+        </section>
+
+        <div class="tips">
+            <div class="tips-title">导出图片说明</div>
+            <ul class="tips-list">
+                <li>方法一: 安装 Puppeteer 并运行 `node export-images.js` 自动导出PNG</li>
+                <li>方法二: 在浏览器中打开 promo-images.html，使用开发者工具截图</li>
+                <li>方法三: 使用在线工具如 screely.com 或 carbon.now.sh</li>
+                <li>建议分辨率: 2x 或更高，确保文字清晰</li>
+                <li>GitHub: <a href="https://github.com/jaxky2012/gongwen-engine-open" style="color: #c41e3a;">https://github.com/jaxky2012/gongwen-engine-open</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 导航链接激活状态
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
